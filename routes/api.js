@@ -1,46 +1,71 @@
 const router = require("express").Router();
-const Transaction = require("../models/transaction.js");
+const db = require("../models");
 const path = require('path');
-
-router.post("/api/transaction", ({ body }, res) => {
-  Transaction.create(body)
-    .then(dbTransaction => {
-      res.json(dbTransaction);
-    })
-    .catch(err => {
-      res.status(400).json(err);
-    });
-});
-
-router.post("/api/transaction/bulk", ({ body }, res) => {
-  Transaction.insertMany(body)
-    .then(dbTransaction => {
-      res.json(dbTransaction);
-    })
-    .catch(err => {
-      res.status(400).json(err);
-    });
-});
-
-router.get("/api/transaction", (req, res) => {
-  Transaction.find({})
-    .sort({ date: -1 })
-    .then(dbTransaction => {
-      res.json(dbTransaction);
-    })
-    .catch(err => {
-      res.status(400).json(err);
-    });
-});
+const mongojs = require("mongojs");
 
 router.get("/exercise", (req, res) => {
-  //res.sendFile(path.join(__dirname, '../public', 'exercise.html'));
-  res.render("../exercise.html")
+  res.sendFile(path.join(__dirname, '../public', 'exercise.html'));
 });
 
-router.get("/exercise", (req, res) => {
-  //res.sendFile(path.join(__dirname, '../public', 'exercise.html'));
-  res.render("../exercise.html")
+router.get("/stats", (req, res) => {
+  res.sendFile(path.join(__dirname, '../public', 'stats.html'));
 });
+
+router.get("/api/workouts", (req, res) => {
+  db.Workout.find()
+  .then(dbWorkouts => {
+    res.json(dbWorkouts)
+  })
+  .catch(err => {
+    console.log(err)
+    res.status(400).json(err);
+  });
+})
+
+router.get("/api/workouts/range", (req, res) => {
+  db.Workout.find()
+  .then(dbWorkouts => {
+    res.json(dbWorkouts)
+  })
+  .catch(err => {
+    console.log(err)
+    res.status(400).json(err);
+  });
+})
+
+router.post("/api/workouts", ({ body }, res) => {
+  console.log("yo")
+  const workout = {
+    day: new Date().setDate(new Date().getDate()),
+    exercises: []
+  }
+  db.Workout.create(workout)
+    .then(dbWorkout => {
+      res.json(dbWorkout)
+      console.log(dbWorkout);
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(400).json(err);
+    });
+});
+
+router.put("/api/workouts/:id", (req, res) => {
+  console.log(req.body)
+  console.log(mongojs.ObjectId(req.params.id))
+  db.Workout.update(
+    {_id: mongojs.ObjectId(req.params.id)},
+    { $push: {exercises: req.body },
+     $inc: { totalDuration: req.body.duration }})
+    .then(newExcercise => {
+      console.log(newExcercise)
+      res.json(newExcercise);
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
+});
+
+router.post("/api/workouts")
 
 module.exports = router;
