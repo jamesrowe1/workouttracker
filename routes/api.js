@@ -3,18 +3,22 @@ const db = require("../models");
 const path = require('path');
 const mongojs = require("mongojs");
 
+//opens up the excercise.html file
 router.get("/exercise", (req, res) => {
   res.sendFile(path.join(__dirname, '../public', 'exercise.html'));
 });
 
+//open up the stats page
 router.get("/stats", (req, res) => {
   res.sendFile(path.join(__dirname, '../public', 'stats.html'));
 });
 
+//open the index
 router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
+//return all the workouts
 router.get("/api/workouts", (req, res) => {
   db.Workout.find()
   .then(dbWorkouts => {
@@ -26,6 +30,7 @@ router.get("/api/workouts", (req, res) => {
   });
 })
 
+//return workouts for stats page
 router.get("/api/workouts/range", (req, res) => {
   db.Workout.find()
   .then(dbWorkouts => {
@@ -37,8 +42,8 @@ router.get("/api/workouts/range", (req, res) => {
   });
 })
 
+//add a new workout
 router.post("/api/workouts", ({ body }, res) => {
-  console.log("yo")
   const workout = {
     day: new Date().setDate(new Date().getDate()),
     exercises: []
@@ -54,6 +59,7 @@ router.post("/api/workouts", ({ body }, res) => {
     });
 });
 
+//add a new exercise to the current workout
 router.put("/api/workouts/:id", (req, res) => {
   console.log(req.body)
   console.log(mongojs.ObjectId(req.params.id))
